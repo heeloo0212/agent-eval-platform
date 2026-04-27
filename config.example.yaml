@@ -1,0 +1,24 @@
+run_id: local_example
+tenant_id: default
+dataset:
+  id: ds_example
+  name: 示例回归集
+  version: v1
+  case_count: 3
+agent_endpoint:
+  id: agent_example
+  name: 本地 Agent
+  url: http://host.docker.internal:9000/agent
+  headers:
+    - key: Authorization
+      value: Bearer replace-me
+  timeout_seconds: 60
+  retries: 1
+judge:
+  id: judge_heuristic
+  name: 本地启发式裁判
+  provider: heuristic
+  model_name: heuristic-v1
+  base_url:
+  temperature: 0
+concurrency: 5

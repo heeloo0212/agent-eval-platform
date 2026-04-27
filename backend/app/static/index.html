@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AgentEval Pro</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">⚡️ AgentEval Pro</div>
+      <nav class="nav">
+        <button class="nav-link active" data-view="dashboardView">Dashboard</button>
+        <button class="nav-link" data-view="taskView">New Task</button>
+        <button class="nav-link" data-view="assetsView">Datasets</button>
+        <button class="nav-link" data-view="settingsView">Endpoints</button>
+      </nav>
+      <div class="admin">👤 Admin</div>
+    </header>
+
+    <main>
+      <section id="dashboardView" class="view active">
+        <div class="page-title">
+          <div>
+            <p class="kicker">Dashboard & Analytics</p>
+            <h1>📊 任务概览: <span id="dashboardTaskName">暂无评测任务</span></h1>
+          </div>
+          <div class="actions">
+            <select id="runPicker"></select>
+            <button id="refreshBtn">刷新数据</button>
+          </div>
+        </div>
+
+        <div id="overview" class="metrics"></div>
+
+        <div class="dashboard-grid">
+          <section class="panel">
+            <div class="panel-heading">
+              <h2>🕸️ 能力雷达图</h2>
+              <span>Radar</span>
+            </div>
+            <canvas id="radar" width="560" height="360"></canvas>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <h2>📋 测试用例 Top 失败清单</h2>
+              <span>Bad Cases</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Case ID</th>
+                    <th>类型</th>
+                    <th>预期得分</th>
+                    <th>实际</th>
+                  </tr>
+                </thead>
+                <tbody id="badCaseRows"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="taskView" class="view">
+        <div class="page-title">
+          <div>
+            <p class="kicker">Task Configuration</p>
+            <h1>⚙️ 新建评测任务</h1>
+          </div>
+          <button form="evaluationForm" type="submit">▶️ 立即运行</button>
+        </div>
+
+        <div class="task-grid">
+          <section class="panel">
+            <h2>📁 基础设置</h2>
+            <form id="evaluationForm" class="form">
+              <label>租户 ID <input name="tenant_id" value="default" /></label>
+              <label>数据集 <select name="dataset_id" required></select></label>
+              <label>目标端点 <select name="endpoint_id" required></select></label>
+              <label>裁判模型 <select name="judge_id"></select></label>
+              <label>并发数 <input name="concurrency" type="number" value="5" min="1" max="100" /></label>
+            </form>
+
+            <h2>⚖️ 裁判配置</h2>
+            <div class="quick-list">
+              <div id="selectedEndpoint" class="summary-card">请选择目标端点</div>
+              <div id="selectedJudge" class="summary-card">未选择时使用启发式裁判</div>
+            </div>
+          </section>
+
+          <section class="panel editor-panel">
+            <div class="panel-heading">
+              <h2>📝 核心配置</h2>
+              <span>config.yaml 预览</span>
+            </div>
+            <textarea id="yamlPreview" spellcheck="false"></textarea>
+          </section>
+        </div>
+      </section>
+
+      <section id="assetsView" class="view">
+        <div class="page-title">
+          <div>
+            <p class="kicker">Dataset Management</p>
+            <h1>📁 数据集管理</h1>
+          </div>
+        </div>
+        <div class="dashboard-grid">
+          <section class="panel">
+            <form id="datasetForm" class="form">
+              <label>租户 ID <input name="tenant_id" value="default" /></label>
+              <label>数据集名称 <input name="name" required placeholder="default_qa" /></label>
+              <label>版本 <input name="version" value="v1" /></label>
+              <label>CSV / JSONL 文件 <input name="file" type="file" accept=".csv,.jsonl" required /></label>
+              <button type="submit">上传数据集</button>
+            </form>
+          </section>
+          <section class="panel">
+            <h2>已上传数据集</h2>
+            <div id="datasets" class="list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="settingsView" class="view">
+        <div class="page-title">
+          <div>
+            <p class="kicker">Endpoint & Judge Settings</p>
+            <h1>🔌 端点与裁判配置</h1>
+          </div>
+        </div>
+        <div class="dashboard-grid">
+          <section class="panel">
+            <h2>Agent API 端点</h2>
+            <form id="endpointForm" class="form">
+              <label>租户 ID <input name="tenant_id" value="default" /></label>
+              <label>端点名称 <input name="name" required placeholder="Qwen Agent" /></label>
+              <label>HTTP POST URL <input name="url" required placeholder="http://localhost:8000/v1" /></label>
+              <label>Headers JSON <textarea name="headers" placeholder='[{"key":"Authorization","value":"Bearer xxx"}]'></textarea></label>
+              <div class="row">
+                <label>超时秒数 <input name="timeout_seconds" type="number" value="60" min="1" max="600" /></label>
+                <label>重试次数 <input name="retries" type="number" value="1" min="0" max="5" /></label>
+              </div>
+              <button type="submit">保存端点</button>
+            </form>
+            <div id="endpoints" class="list"></div>
+          </section>
+
+          <section class="panel">
+            <h2>裁判模型</h2>
+            <form id="judgeForm" class="form">
+              <label>租户 ID <input name="tenant_id" value="default" /></label>
+              <label>配置名称 <input name="name" required placeholder="local-qwen-max" /></label>
+              <label>Provider
+                <select name="provider">
+                  <option value="heuristic">本地启发式裁判</option>
+                  <option value="openai_compatible">OpenAI 兼容接口</option>
+                </select>
+              </label>
+              <label>Model Name <input name="model_name" value="heuristic-v1" /></label>
+              <label>Base URL <input name="base_url" placeholder="http://localhost:8000/v1" /></label>
+              <label>API Key <input name="api_key" type="password" placeholder="sk-..." /></label>
+              <button type="submit">保存裁判</button>
+            </form>
+            <div id="judges" class="list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="caseView" class="view">
+        <div class="detail-header">
+          <button class="secondary" id="backToDashboard">⬅️ 返回列表</button>
+          <h1 id="caseTitle">🔍 用例详情</h1>
+        </div>
+
+        <section class="panel">
+          <h2>🧑‍💻 用户输入</h2>
+          <pre id="caseQuery"></pre>
+        </section>
+
+        <div class="compare-grid">
+          <section class="panel">
+            <h2>🎯 期望输出</h2>
+            <pre id="caseExpected"></pre>
+          </section>
+          <section class="panel">
+            <h2>🤖 Agent 实际输出</h2>
+            <pre id="caseActual"></pre>
+          </section>
+        </div>
+
+        <section class="panel">
+          <h2>⚖️ 裁判机判定理由</h2>
+          <pre id="caseReasoning"></pre>
+        </section>
+      </section>
+    </main>
+
+    <div id="toast"></div>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

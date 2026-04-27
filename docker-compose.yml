@@ -1,0 +1,9 @@
+services:
+  agent-eval-platform:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      AEP_DATA_DIR: /app/data
+    volumes:
+      - ./data:/app/data

@@ -1,0 +1,4 @@
+Case_ID,Category,Query,Context,Expected_Output
+case_001,单轮问答,请说明退款流程。,,提交订单号 联系客服 3个工作日 原路退回
+case_002,长文本抽取,从上下文中抽取客户投诉原因。,客户反馈手机发热严重并且售后等待时间过长。,手机发热 售后等待时间长
+case_003,API 调用,请返回 JSON，包含 city 和 weather 两个字段。,用户问北京天气。,city weather

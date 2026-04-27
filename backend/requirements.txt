@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+httpx
+PyYAML
+langchain
+langgraph
+langchain-openai
+pytest
+pytest-asyncio
